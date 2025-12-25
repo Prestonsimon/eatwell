@@ -1,0 +1,17 @@
+# Dependency Directories
+/node_modules
+
+# Build/Artifacts Directories
+/dist
+/build
+
+# Sensitive Files
+.env
+.env.local
+
+# Logs and Lockfiles
+npm-debug.log*
+yarn-error.log
+
+# Operating System Files
+.DS_Store
