@@ -1,3 +1,4 @@
+import './index.css';
 import React, { useState } from 'react';
 import { Hero } from './components/Hero';
 import { AiKitchen } from './components/AiKitchen';
