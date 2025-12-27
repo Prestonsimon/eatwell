@@ -13,7 +13,7 @@ export async function onRequest(context) {
       throw new Error("GEMINI_API_KEY is missing from Cloudflare environment variables.");
     }
 
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/ggemini-1.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
     const payload = {
       // 1. System Instruction is its own top-level property
