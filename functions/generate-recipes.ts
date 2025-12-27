@@ -16,19 +16,27 @@ export async function onRequest(context) {
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
     const payload = {
-      contents: {
-        parts: imageBase64 
-          ? [
-              { inlineData: { mimeType: "image/jpeg", data: imageBase64 } },
-              { text: "Analyze these ingredients/food items. " + prompt }
-            ]
-          : [{ text: prompt }]
+      // 1. System Instruction is its own top-level property
+      system_instruction: {
+        parts: [{ 
+          text: "You are a world-class sustainable chef and nutritionist. Always suggest 3 distinct healthy recipes in JSON format. Prioritize seasonal and eco-friendly ingredients." 
+        }]
       },
+      // 2. The user's prompt and image
+      contents: [
+        {
+          parts: imageBase64 
+            ? [
+                { inlineData: { mimeType: "image/jpeg", data: imageBase64 } },
+                { text: "Analyze these ingredients: " + prompt }
+              ]
+            : [{ text: prompt }]
+        }
+      ],
+      // 3. Config only handles the "how", not the "what"
       generationConfig: {
-        systemInstruction: {
-          parts: [{ text: "You are a world-class sustainable chef. Return exactly 3 recipes in JSON format." }]
-        },
-        responseMimeType: "application/json"
+        responseMimeType: "application/json",
+        temperature: 0.7
       }
     };
 
