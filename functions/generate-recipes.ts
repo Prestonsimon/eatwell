@@ -8,65 +8,54 @@ export async function onRequest(context) {
   try {
     const { prompt, imageBase64 } = await request.json();
     
-    // Cloudflare Functions use env.VARIABLE_NAME
-    const API_KEY = env.GEMINI_API_KEY; 
-    const MODEL = "gemini-2.0-flash"; // Using the stable 2025 version
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+    // Check if the key even exists in the environment
+    if (!env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is missing from Cloudflare environment variables.");
+    }
 
-    // Reconstruct the exact payload from your original service
-    const contents = {
-      parts: imageBase64 
-        ? [
-            { inlineData: { mimeType: "image/jpeg", data: imageBase64 } },
-            { text: "Analyze these ingredients/food items. " + prompt }
-          ]
-        : [{ text: prompt }]
-    };
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
-    const generationConfig = {
-      systemInstruction: {
-        parts: [{ text: "You are a world-class sustainable chef and nutritionist. Suggest 3 distinct eco-friendly recipes in JSON format." }]
+    const payload = {
+      contents: {
+        parts: imageBase64 
+          ? [
+              { inlineData: { mimeType: "image/jpeg", data: imageBase64 } },
+              { text: "Analyze these ingredients/food items. " + prompt }
+            ]
+          : [{ text: prompt }]
       },
-      responseMimeType: "application/json",
-      // Note: We pass the schema here to ensure structured output
-      responseSchema: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            description: { type: "string" },
-            cookingTime: { type: "string" },
-            difficulty: { type: "string", enum: ["Easy", "Medium", "Hard"] },
-            calories: { type: "integer" },
-            servings: { type: "integer" },
-            sustainabilityScore: { type: "integer" },
-            ecoTip: { type: "string" },
-            ingredients: { type: "array", items: { type: "string" } },
-            instructions: { type: "array", items: { type: "string" } },
-            tags: { type: "array", items: { type: "string" } }
-          },
-          required: ["title", "description", "cookingTime", "ingredients", "instructions", "ecoTip"]
-        }
+      generationConfig: {
+        systemInstruction: {
+          parts: [{ text: "You are a world-class sustainable chef. Return exactly 3 recipes in JSON format." }]
+        },
+        responseMimeType: "application/json"
       }
     };
 
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents, generationConfig })
+      body: JSON.stringify(payload)
     });
 
     const result = await response.json();
+
+    // ERROR HANDLING: If Google returns an error, pass it through to your logs
+    if (result.error) {
+      return new Response(JSON.stringify({ error: result.error.message }), { status: 400 });
+    }
+
+    let textOutput = result.candidates[0].content.parts[0].text;
     
-    // Extract just the text content to send back to the frontend
-    const textOutput = result.candidates[0].content.parts[0].text;
-    
+    // CLEANING: Strip markdown if Gemini sends it (very common)
+    textOutput = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
+
     return new Response(textOutput, {
       headers: { "Content-Type": "application/json" }
     });
 
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  } catch (err) {
+    // This will now show up in your Cloudflare Log Stream!
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
