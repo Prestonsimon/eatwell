@@ -18,7 +18,12 @@ export async function onRequest(context) {
     const payload = {
       system_instruction: {
         parts: [{ 
-          text: "You are a world-class sustainable chef. Suggest 3 distinct healthy recipes in JSON format." 
+          text: "You are a world-class sustainable chef. Suggest 3 distinct healthy recipes in JSON format."
+          + "EACH recipe MUST contain these EXACT keys: "
+          + "'title', 'description', 'cookingTime', 'difficulty', 'calories', 'servings', "
+          + "'sustainabilityScore', 'ecoTip', 'ingredients' (array of strings), " 
+          + "'instructions' (array of strings), and 'tags' (array of strings). "
+          + "Do not omit any fields." 
         }]
       },
       contents: [
