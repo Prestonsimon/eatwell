@@ -13,7 +13,7 @@ export async function onRequest(context) {
     }
 
     // FIX: Changed to a valid model name
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-lite:generateContent?key=${env.GEMINI_API_KEY}`;
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
 
     const payload = {
       system_instruction: {

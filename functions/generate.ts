@@ -12,7 +12,7 @@ export async function onRequest(context) {
     // 2. Call Gemini using the SECURE key stored in Cloudflare
     // Note: In Functions, we use env.NAME, not import.meta.env
     const api_key = env.GEMINI_API_KEY; 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${api_key}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${api_key}`;
 
     const response = await fetch(url, {
       method: "POST",
