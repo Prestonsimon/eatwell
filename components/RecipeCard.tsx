@@ -30,7 +30,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onViewRecipe }) 
       <div className="p-6 flex-grow flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <div className="flex gap-2 flex-wrap">
-            {recipe.tags.slice(0, 3).map((tag, idx) => (
+            {recipe?.tags.length > 0 && recipe.tags.slice(0, 3).map((tag, idx) => (
               <span key={idx} className="text-xs font-semibold px-2 py-1 bg-stone-100 text-stone-600 rounded-full">
                 {tag}
               </span>
