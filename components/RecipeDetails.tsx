@@ -190,7 +190,7 @@ export const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe, onBack }) 
 
               <ul className="space-y-4">
                 {/* 🛡️ Guard: Ensure ingredients is an array before mapping */}
-                {(recipe?.ingredients || [].length > 0 ? (
+                {(recipe?.ingredients || []).length > 0 ? (
                   recipe.ingredients.map((ingredient, idx) => (
                   <li 
                     key={idx}
@@ -218,7 +218,7 @@ export const RecipeDetails: React.FC<RecipeDetailsProps> = ({ recipe, onBack }) 
                   </li>
                 )}
               </ul>
-              
+
               <div className="mt-8 bg-emerald-100/50 p-6 rounded-2xl border border-emerald-100">
                 <div className="flex items-start gap-3 mb-2">
                   <Leaf className="text-emerald-600 mt-1" size={20} />
