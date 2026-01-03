@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Recipe } from '../types';
 import { Clock, BarChart, Leaf, ChevronRight, Flame, Copy, Check } from 'lucide-react';
@@ -30,15 +31,18 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onViewRecipe }) 
       <div className="p-6 flex-grow flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <div className="flex gap-2 flex-wrap">
-            {recipe?.tags.length > 0 && recipe.tags.slice(0, 3).map((tag, idx) => (
+            {(recipe?.tags || []).length > 0 && 
+            recipe.tags.slice(0, 3).map((tag, idx) => (
               <span key={idx} className="text-xs font-semibold px-2 py-1 bg-stone-100 text-stone-600 rounded-full">
                 {tag}
               </span>
-            ))}
+            ))
+            }
           </div>
+          {/* Added'?' to sustainability score to prevent crash if missing */}
           <div className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full text-xs font-bold" title="Sustainability Score">
             <Leaf size={12} />
-            <span>{recipe.sustainabilityScore}/10</span>
+            <span>{recipe?.sustainabilityScore || 0}/10</span>
           </div>
         </div>
 
