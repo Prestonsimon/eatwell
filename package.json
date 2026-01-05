@@ -13,7 +13,8 @@
     "@tailwindcss/vite": "^4.1.18",
     "lucide-react": "^0.560.0",
     "react": "^19.2.2",
-    "react-dom": "^19.2.2"
+    "react-dom": "^19.2.2",
+    "react-ga4": "^2.1.0"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.18",
