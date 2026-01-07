@@ -1,5 +1,6 @@
 import './index.css';
-import React, { useState, useEffect } from 'react'; // Added useEffect
+
+import React, { useState, useEffect } from 'react';
 import { Hero } from './components/Hero';
 import { AiKitchen } from './components/AiKitchen';
 import { Resources } from './components/Resources';
@@ -11,16 +12,17 @@ import { Manifesto } from './components/Manifesto';
 import { ViewState, Recipe, ResourceDefinition } from './types';
 import { UtensilsCrossed, Menu, X, Globe } from 'lucide-react';
 import { generateRecipes } from './services/geminiService';
-import ReactGA from "react-ga4"; // Analytics Import
+import ReactGA from "react-ga4";
 
-function App() {
+const App: React.FC = () => {
   // --- 1. State Declarations ---
   const [view, setView] = useState<ViewState>(ViewState.HOME);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [selectedResource, setSelectedResource] = useState<ResourceDefinition | null>(null);
   const [loading,setLoading] = useState<boolean>(false);
   const [error,setError] = useState<string | null>(null);
-  const [selectedResource, setSelectedResource] = useState<ResourceDefinition | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // --- 2. Analytics Initialization ---
@@ -113,100 +115,129 @@ function App() {
   };
 
   return (
-  <div className="min-h-screen bg-stone-50 flex flex-col">
-    {/* --- 1. THE HEADER (Persistent) --- */}
-    <nav className="bg-white/80 backdrop-blur-md border-b border-stone-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
-        <div 
-          className="flex items-center gap-2 cursor-pointer group" 
-          onClick={() => navigateTo(ViewState.HOME)}
-        >
-          <div className="bg-emerald-600 p-1.5 rounded-lg text-white group-hover:bg-emerald-500 transition-colors">
-            <UtensilsCrossed size={20} />
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans selection:bg-emerald-200 selection:text-emerald-900 flex flex-col">
+      
+      {/* Navigation - Exact Design Match */}
+      <header className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-stone-100 transition-all">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8" aria-label="Global">
+          <div className="flex lg:flex-1">
+            <a href="#" onClick={(e) => { e.preventDefault(); navigateTo(ViewState.HOME); }} className="-m-1.5 p-1.5 flex items-center gap-2 group">
+              <div className="bg-stone-900 text-white p-1.5 rounded-lg group-hover:bg-emerald-600 transition-colors">
+                <UtensilsCrossed size={20} />
+              </div>
+              <span className="font-bold text-xl tracking-tight">eatwell<span className="text-emerald-600">.world</span></span>
+            </a>
           </div>
-          <span className="font-bold text-xl text-stone-900 tracking-tight">Eatwell</span>
-        </div>
+          <div className="flex lg:hidden">
+            <button
+              type="button"
+              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-stone-700"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+          <div className="hidden lg:flex lg:gap-x-12">
+            <button onClick={() => navigateTo(ViewState.HOME)} className={`text-sm font-semibold leading-6 ${view === ViewState.HOME ? 'text-emerald-600' : 'text-stone-900 hover:text-emerald-600 transition-colors'}`}>Home</button>
+            <button onClick={() => navigateTo(ViewState.KITCHEN)} className={`text-sm font-semibold leading-6 ${view === ViewState.KITCHEN || view === ViewState.RECIPE_DETAILS ? 'text-emerald-600' : 'text-stone-900 hover:text-emerald-600 transition-colors'}`}>AI Kitchen</button>
+            <button onClick={() => navigateTo(ViewState.RESOURCES)} className={`text-sm font-semibold leading-6 ${view === ViewState.RESOURCES || view === ViewState.RESOURCE_DETAILS ? 'text-emerald-600' : 'text-stone-900 hover:text-emerald-600 transition-colors'}`}>Resources</button>
+          </div>
+          <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-4">
+             <button className="text-sm font-semibold leading-6 text-stone-900 flex items-center gap-2">
+                <Globe size={16} /> EN
+             </button>
+          </div>
+        </nav>
         
-        {/* Simple Desktop Menu */}
-        <div className="hidden md:flex items-center gap-8">
-          <button onClick={() => navigateTo(ViewState.KITCHEN)} className="text-sm font-medium text-stone-600 hover:text-emerald-600 transition-colors">AI Kitchen</button>
-          <button onClick={() => navigateTo(ViewState.MANIFESTO)} className="text-sm font-medium text-stone-600 hover:text-emerald-600 transition-colors">Manifesto</button>
-          <button 
-            onClick={() => navigateTo(ViewState.KITCHEN)}
-            className="bg-stone-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-stone-800 transition-all"
-          >
-            Start Cooking
-          </button>
+        {mobileMenuOpen && (
+          <div className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-stone-200 shadow-xl py-6 px-4 flex flex-col gap-4">
+            <button onClick={() => navigateTo(ViewState.HOME)} className="text-base font-semibold text-stone-900 py-2 text-left">Home</button>
+            <button onClick={() => navigateTo(ViewState.KITCHEN)} className="text-base font-semibold text-stone-900 py-2 text-left">AI Kitchen</button>
+            <button onClick={() => navigateTo(ViewState.RESOURCES)} className="text-base font-semibold text-stone-900 py-2 text-left">Resources</button>
+          </div>
+        )}
+      </header>
+
+      <main className="pt-20 flex-grow">
+        {view === ViewState.HOME && (
+          <Hero 
+            onStart={() => navigateTo(ViewState.KITCHEN)} 
+            onViewManifesto={() => navigateTo(ViewState.MANIFESTO)} 
+          />
+        )}
+        
+        {view === ViewState.KITCHEN && (
+          <AiKitchen 
+            recipes={recipes} 
+            onViewRecipe={handleViewRecipe}
+            onGenerate={handleGenerate}
+            isLoading={loading}
+            error={error}
+          />
+        )}
+
+        {view === ViewState.RECIPE_DETAILS && selectedRecipe && (
+          <RecipeDetails 
+            recipe={selectedRecipe} 
+            onBack={() => navigateTo(ViewState.KITCHEN)} 
+          />
+        )}
+
+        {view === ViewState.RESOURCES && <Resources onViewResource={handleViewResource} />}
+
+        {view === ViewState.RESOURCE_DETAILS && selectedResource && (
+          <ResourceDetails 
+            resource={selectedResource} 
+            onBack={() => navigateTo(ViewState.RESOURCES)} 
+          />
+        )}
+
+        {view === ViewState.MANIFESTO && <Manifesto onBack={() => navigateTo(ViewState.HOME)} />}
+        {view === ViewState.PRIVACY && <PrivacyPolicy onBack={() => navigateTo(ViewState.HOME)} />}
+        {view === ViewState.TERMS && <TermsOfService onBack={() => navigateTo(ViewState.HOME)} />}
+      </main>
+
+      {/* Footer - Exact Design Match */}
+      <footer className="bg-stone-900 text-stone-400 py-12 mt-20">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+             <div className="col-span-1 md:col-span-1">
+                <div className="flex items-center gap-2 text-white mb-4">
+                  <UtensilsCrossed size={20} />
+                  <span className="font-bold text-xl">eatwell.world</span>
+                </div>
+                <p className="text-sm leading-6">
+                  Empowering humans to eat healthier for themselves and the planet through AI.
+                </p>
+             </div>
+             <div>
+                <h3 className="text-white font-semibold mb-4">Platform</h3>
+                <ul className="space-y-2 text-sm">
+                   <li><button onClick={() => navigateTo(ViewState.KITCHEN)} className="hover:text-emerald-400 text-left">Kitchen AI</button></li>
+                   <li><button onClick={() => navigateTo(ViewState.RESOURCES)} className="hover:text-emerald-400 text-left">Resources</button></li>
+                </ul>
+             </div>
+             <div>
+                <h3 className="text-white font-semibold mb-4">Company</h3>
+                <ul className="space-y-2 text-sm">
+                   <li><button onClick={() => navigateTo(ViewState.MANIFESTO)} className="hover:text-emerald-400 text-left">About Us</button></li>
+                </ul>
+             </div>
+             <div>
+                <h3 className="text-white font-semibold mb-4">Legal</h3>
+                <ul className="space-y-2 text-sm">
+                   <li><button onClick={() => navigateTo(ViewState.PRIVACY)} className="hover:text-emerald-400 text-left">Privacy Policy</button></li>
+                   <li><button onClick={() => navigateTo(ViewState.TERMS)} className="hover:text-emerald-400 text-left">Terms of Service</button></li>
+                </ul>
+             </div>
+          </div>
+          <div className="border-t border-stone-800 pt-8 text-center text-xs">
+            &copy; 2026 Eatwell World. All rights reserved.
+          </div>
         </div>
-      </div>
-    </nav>
+      </footer>
+    </div>
+  );
+};
 
-    {/* --- 2. THE CONTENT (Changes based on View) --- */}
-    <main className="flex-grow">
-      {view === ViewState.HOME && (
-        <Hero 
-          onStart={() => navigateTo(ViewState.KITCHEN)} 
-          onViewManifesto={() => navigateTo(ViewState.MANIFESTO)} 
-        />
-      )}
-      
-      {view === ViewState.KITCHEN && (
-        <AiKitchen 
-          onGenerate={handleGenerate} 
-          onViewRecipe={handleViewRecipe}
-          recipes={recipes}
-          isLoading={loading}
-          error={error}
-        />
-      )}
-      
-      {/* ... Other Views (RecipeDetails, Manifesto, etc.) */}
-    </main>
-
-    {/* --- 3. THE FOOTER (Persistent & Matches Hero Style) --- */}
-    <footer className="bg-white border-t border-stone-200 pt-16 pb-8">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <UtensilsCrossed className="text-emerald-600" size={24} />
-              <span className="font-bold text-2xl text-stone-900">Eatwell</span>
-            </div>
-            <p className="text-stone-600 text-lg leading-relaxed max-w-sm">
-              Discover personalized, sustainable recipes tailored to your ingredients and lifestyle. 
-            </p>
-          </div>
-          
-          <div>
-            <h4 className="font-bold text-stone-900 mb-6 uppercase tracking-wider text-xs">Platform</h4>
-            <ul className="space-y-4 text-stone-600">
-              <li><button onClick={() => navigateTo(ViewState.HOME)} className="hover:text-emerald-600 transition-colors">Home</button></li>
-              <li><button onClick={() => navigateTo(ViewState.KITCHEN)} className="hover:text-emerald-600 transition-colors">AI Kitchen</button></li>
-              <li><button onClick={() => navigateTo(ViewState.MANIFESTO)} className="hover:text-emerald-600 transition-colors">Manifesto</button></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-stone-900 mb-6 uppercase tracking-wider text-xs">Legal</h4>
-            <ul className="space-y-4 text-stone-600">
-              <li><button onClick={() => navigateTo(ViewState.PRIVACY)} className="hover:text-emerald-600 transition-colors">Privacy Policy</button></li>
-              <li><button onClick={() => navigateTo(ViewState.TERMS)} className="hover:text-emerald-600 transition-colors">Terms of Service</button></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="pt-8 border-t border-stone-100 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-sm text-stone-500">
-            © 2026 Eatwell AI. Built for a healthier planet.
-          </p>
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5 text-sm text-stone-500">
-              <Globe size={16} className="text-emerald-600" /> Global Initiative
-            </span>
-          </div>
-        </div>
-      </div>
-    </footer>
-  </div>
-);
-}export default App;
+export default App;
