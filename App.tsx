@@ -113,8 +113,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
-      <main>
+    <div className="min-h-screen bg-stone-50 flex flex-col">
+      <main className="flex-grow">
         {view === ViewState.HOME && <Hero onStart={() => navigateTo(ViewState.KITCHEN)} />}
         
         {view === ViewState.KITCHEN && (
@@ -127,10 +127,10 @@ function App() {
           />
         )}
         
-        {view === ViewState.RESOURCES && selectedRecipe && (
-          <RecipeDetails 
-            recipe={selectedRecipe} 
-            onBack={() => navigateTo(ViewState.KITCHEN)} 
+        {view === ViewState.RESOURCE_DETAILS && selectedResource && (
+          <ResourceDetails 
+            resource={selectedResource} 
+            onBack={() => navigateTo(ViewState.HOME)} 
           />
         )}
 
@@ -141,10 +141,42 @@ function App() {
           />
         )}
 
-        {/* ... Other view conditions (Privacy, Terms, etc.) */}
+        {/* Legal Pages */}
+        {view === ViewState.PRIVACY && <PrivacyPolicy onBack={() => navigateTo(ViewState.HOME)} />}
+        {view === ViewState.TERMS && <TermsOfService onBack={() => navigateTo(ViewState.HOME)} />}
+        {view === ViewState.MANIFESTO && <Manifesto onBack={() => navigateTo(ViewState.HOME)} />}
       </main>
 
       {/* Your Footer here */}
+      <footer className="mt-16 border-t border-stone-200 bg-white py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            {/* Logo Group */}
+            <div className="flex items-center gap-2">
+              <UtensilsCrossed className="text-emerald-600" size={20} />
+              <span className="font-bold text-stone-900">Eatwell</span>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="flex gap-6 text-sm text-stone-500">
+              <button onClick={() => navigateTo(ViewState.PRIVACY)} className="hover:text-emerald-600">Privacy</button>
+              <button onClick={() => navigateTo(ViewState.TERMS)} className="hover:text-emerald-600">Terms</button>
+              <button onClick={() => navigateTo(ViewState.MANIFESTO)} className="hover:text-emerald-600">Manifesto</button>
+            </div>
+
+            {/* Action Button */}
+            <button 
+              onClick={() => navigateTo(ViewState.HOME)} 
+              className="px-6 py-2 bg-stone-900 text-white rounded-lg font-semibold hover:bg-emerald-600 transition-colors"
+            >
+              Explore More
+            </button>
+
+          </div>
+          <p className="mt-8 text-xs text-stone-400">© 2026 Eatwell AI. Sustainable cooking for all.</p>
+        </div>
+      </footer>
     </div>
   );
 }
