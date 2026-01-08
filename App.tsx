@@ -29,14 +29,20 @@ const App: React.FC = () => {
   // -- Saved recipes state ---
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>(() => {
     //check if browser has saved recipes from a previous session
+   try {
     const saved = localStorage.getItem('eatwell-saved-Recipes');
-    return saved ? JSON.parse(saved) : [];
-  });
+    const parsed = saved ? JSON.parse(saved) : [];
+    // 🛡️ Safety Check: If it's not an array, return empty array
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+});
 
   // --- Auto save to Browser Storage ---
   useEffect(() => {
-    localStorage.setItem('eatwell-saved-Recipes', JSON.stringify(savedRecipes));
-  }, [savedRecipes]);
+  localStorage.setItem('eatwell-saved-Recipes', JSON.stringify(savedRecipes));
+}, [savedRecipes]);
 
   // --- 2. Analytics Initialization ---
   useEffect(() => {
@@ -183,7 +189,7 @@ const App: React.FC = () => {
               onClick={() => navigateTo(ViewState.SAVED_RECIPES)}
               className={`text-sm font-semibold leading-6 flex items-center gap-2 ${view === ViewState.SAVED_RECIPES ? 'text-emerald-600' : 'text-stone-900 hover:text-emerald-600 transition-colors'}`}
             >
-              Saved ({SavedRecipes.length})
+              Saved ({savedRecipes.length})
             </button>
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-4">
@@ -243,7 +249,7 @@ const App: React.FC = () => {
             recipe={selectedRecipe}
             onBack={() => navigateTo(ViewState.KITCHEN)}
             onSave={() => handleToggleSave(selectedRecipe)}
-            isSaved={SavedRecipes.some((r) => r.title === selectedRecipe.title)}
+            isSaved={savedRecipes.some((r) => r.title === selectedRecipe.title)}
           />
         )}
 
