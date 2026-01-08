@@ -12,6 +12,7 @@ import { Manifesto } from './components/Manifesto';
 import { ViewState, Recipe, ResourceDefinition } from './types';
 import { UtensilsCrossed, Menu, X, Globe } from 'lucide-react';
 import { generateRecipes } from './services/geminiService';
+import { SavedRecipes } from './components/SavedRecipes';
 import ReactGA from "react-ga4";
 
 const App: React.FC = () => {
@@ -178,6 +179,12 @@ const App: React.FC = () => {
             <button onClick={() => navigateTo(ViewState.HOME)} className={`text-sm font-semibold leading-6 ${view === ViewState.HOME ? 'text-emerald-600' : 'text-stone-900 hover:text-emerald-600 transition-colors'}`}>Home</button>
             <button onClick={() => navigateTo(ViewState.KITCHEN)} className={`text-sm font-semibold leading-6 ${view === ViewState.KITCHEN || view === ViewState.RECIPE_DETAILS ? 'text-emerald-600' : 'text-stone-900 hover:text-emerald-600 transition-colors'}`}>AI Kitchen</button>
             <button onClick={() => navigateTo(ViewState.RESOURCES)} className={`text-sm font-semibold leading-6 ${view === ViewState.RESOURCES || view === ViewState.RESOURCE_DETAILS ? 'text-emerald-600' : 'text-stone-900 hover:text-emerald-600 transition-colors'}`}>Resources</button>
+            <button
+              onClick={() => navigateTo(ViewState.SAVED_RECIPES)}
+              className={`text-sm font-semibold leading-6 flex items-center gap-2 ${view === ViewState.SAVED_RECIPES ? 'text-emerald-600' : 'text-stone-900 hover:text-emerald-600 transition-colors'}`}
+            >
+              Saved ({SavedRecipes.length})
+            </button>
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-4">
              <button className="text-sm font-semibold leading-6 text-stone-900 flex items-center gap-2">
@@ -191,6 +198,7 @@ const App: React.FC = () => {
             <button onClick={() => navigateTo(ViewState.HOME)} className="text-base font-semibold text-stone-900 py-2 text-left">Home</button>
             <button onClick={() => navigateTo(ViewState.KITCHEN)} className="text-base font-semibold text-stone-900 py-2 text-left">AI Kitchen</button>
             <button onClick={() => navigateTo(ViewState.RESOURCES)} className="text-base font-semibold text-stone-900 py-2 text-left">Resources</button>
+          <button onClick={() => navigateTo(ViewState.SAVED_RECIPES)} className="text-base font-semibold text-stone-900 py-2 text-left">Saved ({SavedRecipes.length})</button>
           </div>
         )}
       </header>
