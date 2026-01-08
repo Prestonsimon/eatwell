@@ -129,6 +129,32 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
           ))}
         </div>
       )}
+
+      {!isLoading && recipes.length === 0 && !error && (
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-60">
+            <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
+              <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Camera size={24} />
+              </div>
+              <h4 className="font-bold text-stone-900 mb-2">Snap your Fridge</h4>
+              <p className="text-sm text-stone-500">Take a photo of your open fridge or pantry shelf. AI identifies ingredients automatically.</p>
+            </div>
+            <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Leaf size={24} />
+              </div>
+              <h4 className="font-bold text-stone-900 mb-2">Sustainable Swaps</h4>
+              <p className="text-sm text-stone-500">We prioritize low-carbon ingredients and suggest eco-friendly alternatives.</p>
+            </div>
+            <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles size={24} />
+              </div>
+              <h4 className="font-bold text-stone-900 mb-2">Chef Quality</h4>
+              <p className="text-sm text-stone-500">Recipes crafted to be nutritionally balanced and restaurant-quality delicious.</p>
+            </div>
+          </div>
+      )}
     </div>
   );
 };
