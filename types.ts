@@ -37,6 +37,7 @@ export interface ResourceDefinition {
 export enum ViewState {
   HOME = 'HOME',
   KITCHEN = 'KITCHEN',
+  SAVED_RECIPES = 'SAVED_RECIPES',
   ABOUT = 'ABOUT',
   RESOURCES = 'RESOURCES',
   RESOURCE_DETAILS = 'RESOURCE_DETAILS',

@@ -25,6 +25,18 @@ const App: React.FC = () => {
   const [error,setError] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // -- Saved recipes state ---
+  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>(() => {
+    //check if browser has saved recipes from a previous session
+    const saved = localStorage.getItem('eatwell-saved-Recipes');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // --- Auto save to Browser Storage ---
+  useEffect(() => {
+    localStorage.setItem('eatwell-saved-Recipes', JSON.stringify(savedRecipes));
+  }, [savedRecipes]);
+
   // --- 2. Analytics Initialization ---
   useEffect(() => {
     // Vite will look for an environment variable named VITE_GA_ID
@@ -114,6 +126,26 @@ const App: React.FC = () => {
     }
   };
 
+  const handleToggleSave = (recipe: Recipe) => {
+      setSavedRecipes((prev) => {
+        const isAlreadSaved = prev.some((r) => r.title === recipe.title);
+        if (isAlreadSaved) {
+          // Remove it (unsave)
+          return prev.filter((r) => r.title !== recipe.title);
+        } else {
+          // Add it (save)
+          return [...prev, recipe];
+        }
+      });
+
+    // Track in analytics
+    ReactGA.event({
+      category: "User Actions",
+      action: "Toggled Save Recipe",
+      label: recipe.title
+    });
+  };
+  
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans selection:bg-emerald-200 selection:text-emerald-900 flex flex-col">
       
@@ -189,6 +221,23 @@ const App: React.FC = () => {
           <ResourceDetails 
             resource={selectedResource} 
             onBack={() => navigateTo(ViewState.RESOURCES)} 
+          />
+        )}
+
+        {view === ViewState.SAVED_RECIPES && (
+          <savedRecipes
+        recipes={savedRecipes}
+        onViewRecipe={handleViewRecipe}
+        onGoToKitchen={() => navigateTo(ViewState.KITCHEN)}
+      />
+        )}
+        {/*update RECIPE_DETAILS to INCLUDE SAVED FUNCTIONALITY*/}
+        {view === ViewState.RECIPE_DETAILS && selectedRecipe && (
+          <RecipeDetails 
+            recipe={selectedRecipe}
+            onBack={() => navigateTo(ViewState.KITCHEN)}
+            onSave={() => handleToggleSave(selectedRecipe)}
+            isSaved={savedRecipes.some((r) => r.title === selectedRecipe.title)}
           />
         )}
 
