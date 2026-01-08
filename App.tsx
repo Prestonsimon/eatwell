@@ -27,7 +27,7 @@ const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // -- Saved recipes state ---
-  const [SavedRecipes, setSavedRecipes] = useState<Recipe[]>(() => {
+  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>(() => {
     //check if browser has saved recipes from a previous session
     const saved = localStorage.getItem('eatwell-saved-Recipes');
     return saved ? JSON.parse(saved) : [];
@@ -35,8 +35,8 @@ const App: React.FC = () => {
 
   // --- Auto save to Browser Storage ---
   useEffect(() => {
-    localStorage.setItem('eatwell-saved-Recipes', JSON.stringify(SavedRecipes));
-  }, [SavedRecipes]);
+    localStorage.setItem('eatwell-saved-Recipes', JSON.stringify(savedRecipes));
+  }, [savedRecipes]);
 
   // --- 2. Analytics Initialization ---
   useEffect(() => {
@@ -232,7 +232,7 @@ const App: React.FC = () => {
 
         {view === ViewState.SAVED_RECIPES && (
           <SavedRecipes
-        recipes={SavedRecipes}
+        recipes={savedRecipes}
         onViewRecipe={handleViewRecipe}
         onGoToKitchen={() => navigateTo(ViewState.KITCHEN)}
       />
