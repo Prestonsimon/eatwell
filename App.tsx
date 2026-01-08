@@ -26,7 +26,7 @@ const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // -- Saved recipes state ---
-  const [savedRecipes, setSavedRecipes] = useState<Recipe[]>(() => {
+  const [SavedRecipes, setSavedRecipes] = useState<Recipe[]>(() => {
     //check if browser has saved recipes from a previous session
     const saved = localStorage.getItem('eatwell-saved-Recipes');
     return saved ? JSON.parse(saved) : [];
@@ -34,8 +34,8 @@ const App: React.FC = () => {
 
   // --- Auto save to Browser Storage ---
   useEffect(() => {
-    localStorage.setItem('eatwell-saved-Recipes', JSON.stringify(savedRecipes));
-  }, [savedRecipes]);
+    localStorage.setItem('eatwell-saved-Recipes', JSON.stringify(SavedRecipes));
+  }, [SavedRecipes]);
 
   // --- 2. Analytics Initialization ---
   useEffect(() => {
@@ -113,8 +113,13 @@ const App: React.FC = () => {
           // Tracks how many
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       // Track when AI fails
+      if (err.message?.includes("overloaded") || (err.toString().includes("overloaded"))) {
+        setError("Our AI chefs are currently overwhelmed with orders! Please try again in a few moments.");
+      } else {
+        setError("Oops something went wrong. Please check your ingredients and try again.");
+      }
       ReactGA.event({
         category: "Recipe Generation",
         action: "Generation Error",
@@ -145,7 +150,7 @@ const App: React.FC = () => {
       label: recipe.title
     });
   };
-  
+
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans selection:bg-emerald-200 selection:text-emerald-900 flex flex-col">
       
@@ -208,13 +213,6 @@ const App: React.FC = () => {
           />
         )}
 
-        {view === ViewState.RECIPE_DETAILS && selectedRecipe && (
-          <RecipeDetails 
-            recipe={selectedRecipe} 
-            onBack={() => navigateTo(ViewState.KITCHEN)} 
-          />
-        )}
-
         {view === ViewState.RESOURCES && <Resources onViewResource={handleViewResource} />}
 
         {view === ViewState.RESOURCE_DETAILS && selectedResource && (
@@ -225,8 +223,8 @@ const App: React.FC = () => {
         )}
 
         {view === ViewState.SAVED_RECIPES && (
-          <savedRecipes
-        recipes={savedRecipes}
+          <SavedRecipes
+        recipes={SavedRecipes}
         onViewRecipe={handleViewRecipe}
         onGoToKitchen={() => navigateTo(ViewState.KITCHEN)}
       />
@@ -237,7 +235,7 @@ const App: React.FC = () => {
             recipe={selectedRecipe}
             onBack={() => navigateTo(ViewState.KITCHEN)}
             onSave={() => handleToggleSave(selectedRecipe)}
-            isSaved={savedRecipes.some((r) => r.title === selectedRecipe.title)}
+            isSaved={SavedRecipes.some((r) => r.title === selectedRecipe.title)}
           />
         )}
 
