@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Search, Loader2, Sparkles, X, Leaf } from 'lucide-react';
+// Added Calendar to imports 
+import { Camera, Search, Loader2, Sparkles, X, Leaf, Calendar } from 'lucide-react'; 
 import { RecipeCard } from './RecipeCard';
 import { Recipe } from '../types';
 
 interface AiKitchenProps {
-  onGenerate: (prompt: string, image?: string) => Promise<void>;
-  onViewRecipe: (recipe: Recipe) => void;
   recipes: Recipe[];
+  onViewRecipe: (recipe: Recipe) => void;
+  onGenerate: (prompt: string, imageBase64?: string) => void;
+  onGenerateMealPlan: () => void; 
   isLoading: boolean;
   error: string | null;
 }
@@ -14,7 +16,8 @@ interface AiKitchenProps {
 export const AiKitchen: React.FC<AiKitchenProps> = ({ 
   recipes, 
   onViewRecipe, 
-  onGenerate, 
+  onGenerate,
+  onGenerateMealPlan, 
   isLoading, 
   error 
 }) => {
@@ -42,14 +45,10 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
     }
   };
 
-  // ✅ FIXED: This now just calls the "Boss" (App.tsx)
-  const handleGenerateClick = async () => {
-    if (!inputText && !selectedImage) return;
-    
-    // We send the data up to App.tsx, which handles the loading, 
-    // the API call, and the Google Analytics event.
-    const prompt = inputText || "Suggest exactly 3 sustainable recipes based on these ingredients.";
-    await onGenerate(prompt, selectedImage || undefined);
+  const handleGenerateClick = () => {
+    // If no text, we provide a default sustainable prompt
+    const finalPrompt = inputText.trim() || "Suggest sustainable recipes based on current seasonal ingredients.";
+    onGenerate(finalPrompt, selectedImage || undefined);
   };
 
   return (
@@ -82,34 +81,46 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
             </div>
           )}
 
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:row gap-4">
             <div className="flex-grow relative">
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Type ingredients..."
-                className="w-full h-full min-h-[120px] md:min-h-[80px] p-4 pr-12 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                placeholder="Type ingredients (e.g. carrots, ginger, oats)..."
+                className="w-full h-full min-h-[120px] p-4 pr-12 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
               />
               <Sparkles className="absolute top-4 right-4 text-emerald-400 opacity-50" />
             </div>
 
-            <div className="flex flex-row md:flex-col gap-3 min-w-[200px]">
+            <div className="flex flex-col gap-3 min-w-[240px]">
               <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
+              
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 font-semibold transition-all ${selectedImage ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600'}`}
+                className={`flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 font-semibold transition-all ${selectedImage ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600'}`}
               >
                 <Camera size={20} />
-                <span className="text-sm">Add Photo</span>
+                <span>{selectedImage ? 'Change Photo' : 'Add Photo'}</span>
               </button>
               
               <button 
-                onClick={handleGenerateClick} // ✅ Use the new simplified click handler
-                disabled={isLoading || (!inputText && !selectedImage)}
-                className="flex-[2] flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-stone-300 text-white rounded-xl font-bold transition-all"
+                onClick={handleGenerateClick}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-stone-300 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200/50"
               >
                 {isLoading ? <Loader2 className="animate-spin" /> : <Search size={20} />}
                 <span>Generate Recipes</span>
+              </button>
+
+              <div className="h-px bg-stone-100 my-1" />
+
+              <button
+                onClick={onGenerateMealPlan}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-emerald-700 border-2 border-emerald-100 rounded-xl font-bold hover:bg-emerald-50 transition-all"
+              >
+                <Calendar size={20} />
+                <span>Weekly Meal Plan</span>
               </button>
             </div>
           </div>
@@ -137,21 +148,21 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
                 <Camera size={24} />
               </div>
               <h4 className="font-bold text-stone-900 mb-2">Snap your Fridge</h4>
-              <p className="text-sm text-stone-500">Take a photo of your open fridge or pantry shelf. AI identifies ingredients automatically.</p>
+              <p className="text-sm text-stone-500">Upload a photo and let AI identify your ingredients.</p>
             </div>
             <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
               <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Leaf size={24} />
               </div>
-              <h4 className="font-bold text-stone-900 mb-2">Sustainable Swaps</h4>
-              <p className="text-sm text-stone-500">We prioritize low-carbon ingredients and suggest eco-friendly alternatives.</p>
+              <h4 className="font-bold text-stone-900 mb-2">Eco-Friendly</h4>
+              <p className="text-sm text-stone-500">Prioritizing low-carbon, plant-forward meal suggestions.</p>
             </div>
             <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
               <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sparkles size={24} />
               </div>
-              <h4 className="font-bold text-stone-900 mb-2">Chef Quality</h4>
-              <p className="text-sm text-stone-500">Recipes crafted to be nutritionally balanced and restaurant-quality delicious.</p>
+              <h4 className="font-bold text-stone-900 mb-2">Instant Planning</h4>
+              <p className="text-sm text-stone-500">Generate a full week of high-protein meals in seconds.</p>
             </div>
           </div>
       )}

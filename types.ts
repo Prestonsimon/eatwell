@@ -38,6 +38,7 @@ export enum ViewState {
   HOME = 'HOME',
   KITCHEN = 'KITCHEN',
   SAVED_RECIPES = 'SAVED_RECIPES',
+  MEAL_PLAN = 'MEAL_PLAN',
   ABOUT = 'ABOUT',
   RESOURCES = 'RESOURCES',
   RESOURCE_DETAILS = 'RESOURCE_DETAILS',
@@ -45,4 +46,12 @@ export enum ViewState {
   PRIVACY = 'PRIVACY',
   TERMS = 'TERMS',
   MANIFESTO = 'MANIFESTO'
+}
+
+export interface DailyPlan {
+  day: string;
+  breakfast: Recipe;
+  lunch: Recipe;
+  snack: Recipe;
+  dinner: Recipe;
 }
