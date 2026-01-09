@@ -25,7 +25,7 @@ export const generateRecipes = async (prompt: string, imageBase64?: string): Pro
 
 // --- 2. Generate full 7 day meal plan ---
 export const generateMealPlan = async (): Promise<DailyPlan[]> => {
-  const prompt = `Create a 7-day meal plan (Breakfast, Lunch, Snack, Dinner). 
+  const prompt = `Create a 5-day meal plan (Breakfast, Lunch, Snack, Dinner). 
 Requirements: High protein, low calorie. 
 IMPORTANT: Return ONLY raw JSON. 
 Keep instructions very short (max 2 sentences per meal). 
