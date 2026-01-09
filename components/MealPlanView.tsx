@@ -106,19 +106,23 @@ export const MealPlanView: React.FC<MealPlanViewProps> = ({ plan, onViewRecipe, 
                 { label: 'Snack', recipe: dayPlan.snack, color: 'bg-purple-50 text-purple-700' },
                 { label: 'Dinner', recipe: dayPlan.dinner, color: 'bg-emerald-50 text-emerald-700' },
               ].map((meal, mIdx) => (
-                <div key={mIdx} className="group cursor-pointer" onClick={() => onViewRecipe(meal.recipe)}>
+                <div key={mIdx} className="group cursor-pointer"
+                // Only trigger if recipe exists
+                onClick={() => meal.recipe && onViewRecipe(meal.recipe)}
+                >
                   <div className={`text-[10px] font-bold uppercase mb-1 px-2 py-0.5 rounded w-max ${meal.color}`}>
-                    {meal.label}
-                  </div>
-                  <h4 className="font-bold text-stone-800 group-hover:text-emerald-600 transition-colors line-clamp-2 text-sm leading-tight">
-                    {meal.recipe?.title}
-                  </h4>
-                  <div className="flex items-center gap-2 mt-2 text-[10px] text-stone-400 font-medium">
-                    <span className="flex items-center gap-1"><Flame size={10}/> {meal.recipe?.calories} kcal</span>
-                    <span className="flex items-center gap-1"><Zap size={10}/> {meal.recipe?.cookingTime}</span>
-                  </div>
-                </div>
-              ))}
+      {meal.label}
+    </div>
+    <h4 className="font-bold text-stone-800 group-hover:text-emerald-600 transition-colors line-clamp-2 text-sm leading-tight">
+      {/* Fallback to "Recipe Pending" if title is missing */}
+      {meal.recipe?.title || "Recipe Selection"}
+    </h4>
+    <div className="flex items-center gap-2 mt-2 text-[10px] text-stone-400 font-medium">
+      <span className="flex items-center gap-1"><Flame size={10}/> {meal.recipe?.calories || 0} kcal</span>
+      <span className="flex items-center gap-1"><Zap size={10}/> {meal.recipe?.cookingTime || '15 min'}</span>
+    </div>
+  </div>
+))}
             </div>
           </div>
         ))}
