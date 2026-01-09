@@ -25,21 +25,20 @@ export const generateRecipes = async (prompt: string, imageBase64?: string): Pro
 
 // --- 2. Generate full 7 day meal plan ---
 export const generateMealPlan = async (): Promise<DailyPlan[]> => {
-  const prompt = `Create a 7-day healthy and sustainable meal plan. 
-  For each day, provide Breakfast, Lunch, Snack, and Dinner. 
-  Requirements: High protein, low calorie, easy to prepare, and eco-friendly ingredients. 
-  IMPORTANT: Return ONLY a raw JSON array of 7 objects. 
-  Be concise with instructions. Use bullet points. Do not include introductory text.
-  Focyus on speed and accuracy
-  Each object must have this structure: 
-  { 
-    "day": "Monday", 
-    "breakfast": { "title": "...", "ingredients": [...], "instructions": [...], "calories": 400, "difficulty": "Easy", "sustainabilityScore": 8, "tags": ["High Protein"], "description": "...", "cookingTime": "15 mins", "ecoTip": "..." },
-    "lunch": { ... },
-    "snack": { ... },
-    "dinner": { ... }
-  }`;
+  const prompt = `Create a 7-day meal plan (Breakfast, Lunch, Snack, Dinner). 
+Requirements: High protein, low calorie. 
+IMPORTANT: Return ONLY raw JSON. 
+Keep instructions very short (max 2 sentences per meal). 
+Do not include descriptions or eco-tips for now.`;
    
+  //Each object must have this structure: 
+  //{ 
+  //  "day": "Monday", 
+  //  "breakfast": { "title": "...", "ingredients": [...], "instructions": [...], "calories": 400, "difficulty": "Easy", "sustainabilityScore": 8, "tags": ["High Protein"], "description": "...", "cookingTime": "15 mins", "ecoTip": "..." },
+  //  "lunch": { ... },
+  //  "snack": { ... },
+  //  "dinner": { ... }
+  
   try {
     // Note: Calling the standard recipe endpoint but passing the meal plan prompt
     const response = await fetch("/generate-recipes", {
