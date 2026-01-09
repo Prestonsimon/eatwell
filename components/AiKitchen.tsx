@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-// Added Calendar to imports 
 import { Camera, Search, Loader2, Sparkles, X, Leaf, Calendar } from 'lucide-react'; 
 import { RecipeCard } from './RecipeCard';
 import { Recipe } from '../types';
@@ -46,7 +45,6 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
   };
 
   const handleGenerateClick = () => {
-    // If no text, we provide a default sustainable prompt
     const finalPrompt = inputText.trim() || "Suggest sustainable recipes based on current seasonal ingredients.";
     onGenerate(finalPrompt, selectedImage || undefined);
   };
@@ -60,44 +58,49 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
         </p>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-xl p-6 md:p-10 mb-16 border border-stone-100 max-w-4xl mx-auto">
+      {/* Main Input Card */}
+      <div className="bg-white rounded-3xl shadow-xl p-6 md:p-10 mb-16 border border-stone-100 max-w-5xl mx-auto">
         <div className="flex flex-col gap-6">
           
           {selectedImage && (
-            <div className="relative w-full h-48 sm:h-64 bg-stone-100 rounded-xl overflow-hidden mb-2 group">
+            <div className="relative w-full h-48 bg-stone-100 rounded-xl overflow-hidden mb-2">
               <img 
                 src={`data:image/jpeg;base64,${selectedImage}`} 
                 alt="Selected ingredients" 
-                className="w-full h-full object-cover opacity-80"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 flex items-center justify-center">
-                 <button 
-                  onClick={clearImage}
-                  className="bg-white/90 text-stone-800 px-4 py-2 rounded-full font-medium shadow-sm hover:bg-white hover:text-red-600 transition-colors flex items-center gap-2"
-                >
-                  <X size={16} /> Remove Image
-                </button>
-              </div>
+              <button 
+                onClick={clearImage}
+                className="absolute top-4 right-4 bg-white/90 text-stone-800 p-2 rounded-full shadow-sm hover:text-red-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
             </div>
           )}
 
-          <div className="flex flex-col md:row gap-4">
+          {/* Desktop Sidebar Layout */}
+          <div className="flex flex-col md:flex-row gap-6">
+            
+            {/* Left: Input Area */}
             <div className="flex-grow relative">
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Type ingredients (e.g. carrots, ginger, oats)..."
-                className="w-full h-full min-h-[120px] p-4 pr-12 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                placeholder="Type ingredients (e.g. carrots, ginger, oats) or dietary goals..."
+                className="w-full h-full min-h-[200px] p-6 pr-12 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-lg"
               />
-              <Sparkles className="absolute top-4 right-4 text-emerald-400 opacity-50" />
+              <Sparkles className="absolute top-6 right-6 text-emerald-400 opacity-50" />
             </div>
 
+            {/* Right: Action Sidebar */}
             <div className="flex flex-col gap-3 min-w-[240px]">
               <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
               
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className={`flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 font-semibold transition-all ${selectedImage ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600'}`}
+                className={`flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 font-semibold transition-all ${
+                  selectedImage ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                }`}
               >
                 <Camera size={20} />
                 <span>{selectedImage ? 'Change Photo' : 'Add Photo'}</span>
@@ -112,17 +115,21 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
                 <span>Generate Recipes</span>
               </button>
 
-              <div className="h-px bg-stone-100 my-1" />
+              <div className="h-px bg-stone-100 my-2" />
 
               <button
                 onClick={onGenerateMealPlan}
                 disabled={isLoading}
-                className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-emerald-700 border-2 border-emerald-100 rounded-xl font-bold hover:bg-emerald-50 transition-all"
+                className="flex flex-col items-center justify-center gap-1 px-6 py-4 bg-white text-emerald-700 border-2 border-emerald-100 rounded-xl font-bold hover:bg-emerald-50 transition-all"
               >
-                <Calendar size={20} />
-                <span>Weekly Meal Plan</span>
+                <div className="flex items-center gap-2">
+                  <Calendar size={20} />
+                  <span>5-Day Work Week</span>
+                </div>
+                <span className="text-[10px] text-emerald-600/70 font-medium uppercase tracking-wider">Plan Mon - Fri</span>
               </button>
             </div>
+
           </div>
         </div>
       </div>
@@ -133,6 +140,7 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
         </div>
       )}
 
+      {/* Results Grid */}
       {recipes.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {recipes.map((recipe, index) => (
@@ -141,6 +149,7 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
         </div>
       )}
 
+      {/* Empty State / Features */}
       {!isLoading && recipes.length === 0 && !error && (
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-60">
             <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
@@ -161,8 +170,8 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
               <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Sparkles size={24} />
               </div>
-              <h4 className="font-bold text-stone-900 mb-2">Instant Planning</h4>
-              <p className="text-sm text-stone-500">Generate a full week of high-protein meals in seconds.</p>
+              <h4 className="font-bold text-stone-900 mb-2">Quick Planning</h4>
+              <p className="text-sm text-stone-500">Get a balanced 5-day work week schedule in seconds.</p>
             </div>
           </div>
       )}
