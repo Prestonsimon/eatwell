@@ -11,7 +11,7 @@ import { Manifesto } from './components/Manifesto';
 import { SavedRecipes } from './components/SavedRecipes';
 import { MealPlanView } from './components/MealPlanView';
 import { ViewState, Recipe, ResourceDefinition, DailyPlan } from './types';
-import { UtensilsCrossed, Menu, X, Globe, Loader2 } from 'lucide-react';
+import { UtensilsCrossed, Menu, X, Loader2 } from 'lucide-react';
 import { generateRecipes, generateMealPlan } from './services/geminiService';
 import ReactGA from "react-ga4";
 
@@ -26,7 +26,14 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // -- Saved recipes state ---
+  // Weekly Planner Workspace state
+  const [weeklyPlanner, setWeeklyPlanner] = useState<{
+    [key: string]: { breakfast?: Recipe; lunch?: Recipe; dinner?: Recipe; snack?: Recipe }
+  }>({
+    Monday: {}, Tuesday: {}, Wednesday: {}, Thursday: {}, Friday: {}, Saturday: {}, Sunday: {}
+  });
+
+  // Saved recipes state (Local Storage)
   const [savedRecipes, setSavedRecipes] = useState<Recipe[]>(() => {
     try {
       const saved = localStorage.getItem('eatwell-saved-recipes');
@@ -88,16 +95,25 @@ const App: React.FC = () => {
     }
   };
 
-  const handleGenerateMealPlan = async () => {
+  // DASHBOARD HANDLER: Generates 3 options for a specific meal type
+  const handleGenerateMealPlan = async (type?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const plan = await generateMealPlan();
-      if (plan && plan.length > 0) {
-        setCurrentMealPlan(plan);
-        navigateTo(ViewState.MEAL_PLAN);
+      // If a type is provided (e.g. 'breakfast'), generate 3 individual recipes for the dashboard
+      if (type && typeof type === 'string') {
+        const prompt = `Generate 3 distinct, high-protein, sustainable ${type} recipes. Focus on seasonal ingredients and low waste.`;
+        const data = await generateRecipes(prompt);
+        if (data && data.length > 0) {
+          setRecipes(data);
+        }
       } else {
-        setError("Failed to generate plan. Please try again.");
+        // Fallback to the full 5-day plan generator if no type is passed
+        const plan = await generateMealPlan();
+        if (plan && plan.length > 0) {
+          setCurrentMealPlan(plan);
+          navigateTo(ViewState.MEAL_PLAN);
+        }
       }
     } catch (err) {
       setError("AI model is currently busy. Try again in a minute.");
@@ -106,12 +122,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSaveAllRecipes = (newRecipes: Recipe[]) => {
-    setSavedRecipes((prev) => {
-      const existingTitles = new Set(prev.map(r => r.title));
-      const uniqueNew = newRecipes.filter(r => !existingTitles.has(r.title));
-      return [...prev, ...uniqueNew];
-    });
+  const handleSaveToPlan = (day: string, mealType: string, recipe: Recipe) => {
+    setWeeklyPlanner(prev => ({
+      ...prev,
+      [day]: { ...prev[day], [mealType]: recipe }
+    }));
+    // Optional: notify the user or navigate to a planner view
   };
 
   const handleToggleSave = (recipe: Recipe) => {
@@ -120,6 +136,14 @@ const App: React.FC = () => {
       return isAlreadySaved 
         ? prev.filter((r) => r.title !== recipe.title) 
         : [...prev, recipe];
+    });
+  };
+
+  const handleSaveAllRecipes = (newRecipes: Recipe[]) => {
+    setSavedRecipes((prev) => {
+      const existingTitles = new Set(prev.map(r => r.title));
+      const uniqueNew = newRecipes.filter(r => !existingTitles.has(r.title));
+      return [...prev, ...uniqueNew];
     });
   };
 
@@ -152,14 +176,6 @@ const App: React.FC = () => {
       </header>
 
       <main className="pt-20 flex-grow">
-        {/* Loading Overlay for Meal Plans */}
-        {loading && view === ViewState.MEAL_PLAN && (
-          <div className="flex flex-col items-center justify-center py-32">
-            <Loader2 className="animate-spin text-emerald-600 mb-4" size={48} />
-            <p className="text-stone-500 font-medium animate-pulse">Designing your 5-day sustainable plan...</p>
-          </div>
-        )}
-
         {view === ViewState.HOME && (
           <Hero 
             onStart={() => navigateTo(ViewState.KITCHEN)} 
@@ -173,6 +189,8 @@ const App: React.FC = () => {
             onViewRecipe={handleViewRecipe}
             onGenerate={handleGenerate}
             onGenerateMealPlan={handleGenerateMealPlan}
+            onSaveToPlan={handleSaveToPlan}
+            weeklyPlanner={weeklyPlanner}
             isLoading={loading}
             error={error}
           />

@@ -1,180 +1,164 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Search, Loader2, Sparkles, X, Leaf, Calendar } from 'lucide-react'; 
-import { RecipeCard } from './RecipeCard';
 import { Recipe } from '../types';
+import { 
+  Sparkles, Camera, Search, Loader2, X, 
+  ChevronRight, Calendar, Flame, ShoppingBag, 
+  UtensilsCrossed, Leaf, Zap 
+} from 'lucide-react';
+import { RecipeCard } from './RecipeCard';
 
 interface AiKitchenProps {
   recipes: Recipe[];
   onViewRecipe: (recipe: Recipe) => void;
   onGenerate: (prompt: string, imageBase64?: string) => void;
-  onGenerateMealPlan: () => void; 
+  onGenerateMealPlan: (type: string) => void;
+  onSaveToPlan: (day: string, mealType: string, recipe: Recipe) => void;
+  weeklyPlanner: any;
   isLoading: boolean;
   error: string | null;
 }
 
 export const AiKitchen: React.FC<AiKitchenProps> = ({ 
-  recipes, 
-  onViewRecipe, 
-  onGenerate,
-  onGenerateMealPlan, 
-  isLoading, 
-  error 
+  recipes, onViewRecipe, onGenerate, onGenerateMealPlan, onSaveToPlan, isLoading, error 
 }) => {
   const [inputText, setInputText] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    const file = e.target.files?.[0];
+    if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result as string;
-        const base64Data = base64String.split(',')[1];
-        setSelectedImage(base64Data);
+        // Remove the data:image/jpeg;base64, prefix for the API
+        const base64String = (reader.result as string).split(',')[1];
+        setSelectedImage(base64String);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const clearImage = () => {
-    setSelectedImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const handleGenerateClick = () => {
-    const finalPrompt = inputText.trim() || "Suggest sustainable recipes based on current seasonal ingredients.";
-    onGenerate(finalPrompt, selectedImage || undefined);
-  };
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-stone-900 mb-4">Your AI Sustainable Kitchen</h2>
-        <p className="text-stone-600 max-w-2xl mx-auto">
-          Tell us what you have, or upload a photo of your fridge contents. 
-        </p>
-      </div>
+    <div className="max-w-7xl mx-auto px-4 py-8 animate-fadeIn">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* SIDEBAR: Controls */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm">
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-stone-900">
+              <Sparkles size={18} className="text-emerald-600" /> AI Kitchen
+            </h3>
+            
+            {selectedImage && (
+              <div className="relative mb-4 rounded-xl overflow-hidden h-40 border border-stone-100">
+                <img 
+                  src={`data:image/jpeg;base64,${selectedImage}`} 
+                  className="w-full h-full object-cover" 
+                  alt="Upload preview"
+                />
+                <button 
+                  onClick={() => setSelectedImage(null)} 
+                  className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full shadow-md hover:bg-white text-stone-600"
+                >
+                  <X size={14}/>
+                </button>
+              </div>
+            )}
 
-      {/* Main Input Card */}
-      <div className="bg-white rounded-3xl shadow-xl p-6 md:p-10 mb-16 border border-stone-100 max-w-5xl mx-auto">
-        <div className="flex flex-col gap-6">
-          
-          {selectedImage && (
-            <div className="relative w-full h-48 bg-stone-100 rounded-xl overflow-hidden mb-2">
-              <img 
-                src={`data:image/jpeg;base64,${selectedImage}`} 
-                alt="Selected ingredients" 
-                className="w-full h-full object-cover"
-              />
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="List your ingredients (e.g., 'Salmon, kale, lemon')..."
+              className="w-full p-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm min-h-[120px] transition-all"
+            />
+            
+            <div className="grid grid-cols-2 gap-3 mt-4">
               <button 
-                onClick={clearImage}
-                className="absolute top-4 right-4 bg-white/90 text-stone-800 p-2 rounded-full shadow-sm hover:text-red-600 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-stone-200 text-stone-600 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all text-xs font-bold"
               >
-                <X size={20} />
+                <Camera size={16} /> {selectedImage ? 'Change' : 'Add Photo'}
               </button>
+              <button 
+                onClick={() => onGenerate(inputText, selectedImage || undefined)}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 p-3 bg-stone-900 text-white rounded-xl font-bold hover:bg-emerald-600 disabled:bg-stone-300 transition-all text-xs shadow-lg"
+              >
+                {isLoading ? <Loader2 className="animate-spin" size={16}/> : <Search size={16}/>} Generate
+              </button>
+            </div>
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              ref={fileInputRef} 
+              onChange={handleFileChange} 
+            />
+          </div>
+
+          {/* MEAL PLAN GENERATORS */}
+          <div className="bg-stone-900 p-6 rounded-3xl text-white shadow-xl">
+            <div className="mb-6">
+              <h3 className="font-bold text-xs uppercase tracking-[0.2em] text-emerald-400 mb-1">Weekly Meal Plans</h3>
+              <p className="text-[10px] text-stone-400">Generate 3 recipe options per category</p>
+            </div>
+            
+            <div className="space-y-3">
+              {[
+                { label: 'Breakfasts', type: 'breakfast', icon: <Zap size={16}/> },
+                { label: 'Lunches', type: 'lunch', icon: <ShoppingBag size={16}/> },
+                { label: 'Dinners', type: 'dinner', icon: <UtensilsCrossed size={16}/> },
+                { label: 'Snacks', type: 'snack', icon: <Leaf size={16}/> },
+              ].map((btn) => (
+                <button
+                  key={btn.type}
+                  onClick={() => onGenerateMealPlan(btn.type)}
+                  className="w-full flex items-center justify-between p-4 bg-stone-800/50 hover:bg-emerald-600/20 border border-stone-700 hover:border-emerald-500/50 rounded-2xl transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-emerald-500">{btn.icon}</span>
+                    <span className="font-semibold text-sm">{btn.label}</span>
+                  </div>
+                  <ChevronRight size={16} className="text-stone-500 group-hover:text-emerald-400" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN: Recipe Cards Grid */}
+        <div className="lg:col-span-8">
+          {error && (
+            <div className="bg-orange-50 text-orange-800 p-4 rounded-2xl mb-6 text-sm border border-orange-100">
+              {error}
             </div>
           )}
 
-          {/* Desktop Sidebar Layout */}
-          <div className="flex flex-col md:flex-row gap-6">
-            
-            {/* Left: Input Area */}
-            <div className="flex-grow relative">
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Type ingredients (e.g. carrots, ginger, oats) or dietary goals..."
-                className="w-full h-full min-h-[200px] p-6 pr-12 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-lg"
-              />
-              <Sparkles className="absolute top-6 right-6 text-emerald-400 opacity-50" />
+          {recipes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {recipes.map((recipe, index) => (
+                <RecipeCard 
+                  key={`${recipe.title}-${index}`} 
+                  recipe={recipe} 
+                  onViewRecipe={onViewRecipe}
+                  onSaveToPlan={onSaveToPlan}
+                  onToggleSave={() => {}} // Pass actual function if you have it in App.tsx
+                />
+              ))}
             </div>
-
-            {/* Right: Action Sidebar */}
-            <div className="flex flex-col gap-3 min-w-[240px]">
-              <input type="file" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
-              
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className={`flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 font-semibold transition-all ${
-                  selectedImage ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-stone-200 text-stone-600 hover:bg-stone-50'
-                }`}
-              >
-                <Camera size={20} />
-                <span>{selectedImage ? 'Change Photo' : 'Add Photo'}</span>
-              </button>
-              
-              <button 
-                onClick={handleGenerateClick}
-                disabled={isLoading}
-                className="flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-stone-300 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200/50"
-              >
-                {isLoading ? <Loader2 className="animate-spin" /> : <Search size={20} />}
-                <span>Generate Recipes</span>
-              </button>
-
-              <div className="h-px bg-stone-100 my-2" />
-
-              <button
-                onClick={onGenerateMealPlan}
-                disabled={isLoading}
-                className="flex flex-col items-center justify-center gap-1 px-6 py-4 bg-white text-emerald-700 border-2 border-emerald-100 rounded-xl font-bold hover:bg-emerald-50 transition-all"
-              >
-                <div className="flex items-center gap-2">
-                  <Calendar size={20} />
-                  <span>5-Day Work Week</span>
-                </div>
-                <span className="text-[10px] text-emerald-600/70 font-medium uppercase tracking-wider">Plan Mon - Fri</span>
-              </button>
+          ) : (
+            <div className="h-full min-h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-stone-200 rounded-[2rem] p-12 text-stone-400">
+               <div className="bg-stone-100 p-6 rounded-full mb-6 text-stone-300">
+                 <Zap size={48}/>
+               </div>
+               <h4 className="text-stone-900 font-bold mb-2">Ready to cook?</h4>
+               <p className="text-center text-sm max-w-xs">
+                 Upload a photo of your fridge or select a meal category to generate custom recipes.
+               </p>
             </div>
-
-          </div>
+          )}
         </div>
       </div>
-
-      {error && (
-        <div className="bg-red-50 text-red-700 p-4 rounded-xl text-center mb-8 max-w-2xl mx-auto border border-red-100">
-          {error}
-        </div>
-      )}
-
-      {/* Results Grid */}
-      {recipes.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {recipes.map((recipe, index) => (
-            <RecipeCard key={index} recipe={recipe} onViewRecipe={onViewRecipe} />
-          ))}
-        </div>
-      )}
-
-      {/* Empty State / Features */}
-      {!isLoading && recipes.length === 0 && !error && (
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-60">
-            <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
-              <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Camera size={24} />
-              </div>
-              <h4 className="font-bold text-stone-900 mb-2">Snap your Fridge</h4>
-              <p className="text-sm text-stone-500">Upload a photo and let AI identify your ingredients.</p>
-            </div>
-            <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Leaf size={24} />
-              </div>
-              <h4 className="font-bold text-stone-900 mb-2">Eco-Friendly</h4>
-              <p className="text-sm text-stone-500">Prioritizing low-carbon, plant-forward meal suggestions.</p>
-            </div>
-            <div className="p-6 bg-white rounded-2xl border border-stone-100 text-center">
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles size={24} />
-              </div>
-              <h4 className="font-bold text-stone-900 mb-2">Quick Planning</h4>
-              <p className="text-sm text-stone-500">Get a balanced 5-day work week schedule in seconds.</p>
-            </div>
-          </div>
-      )}
     </div>
   );
 };

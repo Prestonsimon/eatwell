@@ -1,6 +1,6 @@
 import { Recipe, DailyPlan } from "../types";
 
-// --- 1. Generate Individual Recipes (The "Three Cards" View) ---
+// --- 1. Generate Individual Recipes (Shared logic for all AI calls) ---
 export const generateRecipes = async (prompt: string, imageBase64?: string): Promise<Recipe[]> => {
   try {
     const response = await fetch("/generate-recipes", {
@@ -13,10 +13,9 @@ export const generateRecipes = async (prompt: string, imageBase64?: string): Pro
     
     const data = await response.json();
 
-    // Find the array (Gemini might return a raw array or { recipes: [...] })
-    const rawRecipes = Array.isArray(data) ? data : (data.recipes || data.plan || []);
+    // Handle different possible JSON structures from AI
+    const rawRecipes = Array.isArray(data) ? data : (data.recipes || data.plan || data.meals || []);
 
-    // Sanitize each recipe to prevent "undefined" errors in the UI
     return rawRecipes.map((recipe: any) => ({
       title: recipe.title || "Untitled Recipe",
       ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
@@ -36,56 +35,13 @@ export const generateRecipes = async (prompt: string, imageBase64?: string): Pro
   }
 };
 
-// --- 2. Generate Full 5-Day Meal Plan ---
-export const generateMealPlan = async (): Promise<DailyPlan[]> => {
-  const prompt = `Create a 5-day work week meal plan (Monday to Friday).
-For each day: Breakfast, Lunch, Dinner. 
-Focus: High protein, low calorie, sustainable, low waste. 
-IMPORTANT: Return ONLY raw JSON array of 5 objects, no extra text. 
-Keep instructions short (max 2 sentences per meal).`;
-
-  try {
-    const response = await fetch("/generate-recipes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt })
-    });
-
-    if (!response.ok) throw new Error("Model overloaded or server error");
-
-    const data = await response.json();
-    
-    const rawPlan = Array.isArray(data) ? data : (data.plan || data.meals || data.weeklyPlan || []);
-
-    if (!Array.isArray(rawPlan) || rawPlan.length === 0) {
-      console.error("API did not return a valid meal plan array:", data);
-      return [];
-    }
-
-    return rawPlan.map((day: any) => {
-      const createPlaceholder = (title: string) => ({
-        title: title,
-        ingredients: [],
-        instructions: ["Recipe details pending..."],
-        calories: 0,
-        difficulty: "Easy",
-        sustainabilityScore: 10,
-        tags: ["Planned"],
-        description: "",
-        cookingTime: "15 mins",
-        ecoTip: "Eat fresh!"
-      });
-
-      return {
-        day: day.day || "Work Day",
-        breakfast: day.breakfast || createPlaceholder("Healthy Breakfast"),
-        lunch: day.lunch || createPlaceholder("Balanced Lunch"),
-        dinner: day.dinner || createPlaceholder("Nutritious Dinner")
-      };
-    }) as DailyPlan[];
-
-  } catch (error) {
-    console.error("Meal Plan Fetch Error:", error);
-    return [];
-  }
+// --- 2. Dashboard Helper: Generate 3 specific meals for the Weekly Planner ---
+// This aligns with your App.tsx handleGenerateMealPlan(type)
+export const generateMealPlan = async (type: string): Promise<Recipe[]> => {
+  const prompt = `Generate 3 distinct and creative ${type} recipes for a weekly meal plan.
+  The recipes should be sustainable, high-protein, and easy to prepare.
+  Return the results as a JSON array of 3 objects.`;
+  
+  // We reuse the robust logic in generateRecipes
+  return await generateRecipes(prompt);
 };
