@@ -52,6 +52,5 @@ export interface DailyPlan {
   day: string;
   breakfast: Recipe;
   lunch: Recipe;
-  snack: Recipe;
   dinner: Recipe;
 }

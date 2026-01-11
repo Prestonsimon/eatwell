@@ -26,7 +26,7 @@ export const MealPlanView: React.FC<MealPlanViewProps> = ({ plan, onViewRecipe, 
   // Helper to ensure we only deal with valid Recipe objects
   const handleSaveFullPlan = () => {
     const allRecipes = plan
-      .flatMap(d => [d.breakfast, d.lunch, d.snack, d.dinner])
+      .flatMap(d => [d.breakfast, d.lunch, d.dinner])
       .filter((r): r is Recipe => Boolean(r && r.title));
     onSaveAll(allRecipes);
   };
@@ -47,7 +47,6 @@ export const MealPlanView: React.FC<MealPlanViewProps> = ({ plan, onViewRecipe, 
     const allIngredients = plan.flatMap(day => [
       ...(day.breakfast?.ingredients || []),
       ...(day.lunch?.ingredients || []),
-      ...(day.snack?.ingredients || []),
       ...(day.dinner?.ingredients || [])
     ]);
 
@@ -110,7 +109,6 @@ export const MealPlanView: React.FC<MealPlanViewProps> = ({ plan, onViewRecipe, 
               {[
                 { label: 'Breakfast', recipe: dayPlan.breakfast, color: 'bg-orange-50 text-orange-700' },
                 { label: 'Lunch', recipe: dayPlan.lunch, color: 'bg-blue-50 text-blue-700' },
-                { label: 'Snack', recipe: dayPlan.snack, color: 'bg-purple-50 text-purple-700' },
                 { label: 'Dinner', recipe: dayPlan.dinner, color: 'bg-emerald-50 text-emerald-700' },
               ].map((meal, mIdx) => (
                 <div 

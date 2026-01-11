@@ -39,10 +39,10 @@ export const generateRecipes = async (prompt: string, imageBase64?: string): Pro
 // --- 2. Generate Full 5-Day Meal Plan ---
 export const generateMealPlan = async (): Promise<DailyPlan[]> => {
   const prompt = `Create a 5-day work week meal plan (Monday to Friday).
-For each day: Breakfast, Lunch, Snack, Dinner. 
+For each day: Breakfast, Lunch, Dinner. 
 Focus: High protein, low calorie, sustainable, low waste. 
 IMPORTANT: Return ONLY raw JSON array of 5 objects, no extra text. 
-Keep instructions very short (max 2 sentences per meal).`;
+Keep instructions short (max 2 sentences per meal).`;
 
   try {
     const response = await fetch("/generate-recipes", {
@@ -80,7 +80,6 @@ Keep instructions very short (max 2 sentences per meal).`;
         day: day.day || "Work Day",
         breakfast: day.breakfast || createPlaceholder("Healthy Breakfast"),
         lunch: day.lunch || createPlaceholder("Balanced Lunch"),
-        snack: day.snack || createPlaceholder("Quick Snack"),
         dinner: day.dinner || createPlaceholder("Nutritious Dinner")
       };
     }) as DailyPlan[];
