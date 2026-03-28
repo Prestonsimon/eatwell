@@ -57,6 +57,70 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // --- 3. SEO: Dynamic title & meta description per view ---
+  useEffect(() => {
+    const metaMap: Record<ViewState, { title: string; description: string }> = {
+      [ViewState.HOME]: {
+        title: 'eatwell.world | AI-Powered Sustainable Recipes & Meal Planning',
+        description: 'Generate healthy, sustainable recipes with AI. Enter your ingredients or snap a photo to get personalised high-protein, eco-friendly meal ideas and weekly meal plans.'
+      },
+      [ViewState.KITCHEN]: {
+        title: 'AI Kitchen | eatwell.world',
+        description: 'Use AI Kitchen to generate personalised recipes from your ingredients. Snap a photo or type what you have, and get sustainable, high-protein meal ideas instantly.'
+      },
+      [ViewState.MEAL_PLAN]: {
+        title: 'Your Meal Plan | eatwell.world',
+        description: 'Your personalised AI-generated weekly meal plan — healthy, sustainable, and tailored to your nutritional goals.'
+      },
+      [ViewState.RECIPE_DETAILS]: {
+        title: selectedRecipe ? `${selectedRecipe.title} | eatwell.world` : 'Recipe | eatwell.world',
+        description: selectedRecipe?.description || 'Explore this sustainable, healthy recipe on eatwell.world.'
+      },
+      [ViewState.RESOURCES]: {
+        title: 'Nutrition & Sustainability Resources | eatwell.world',
+        description: 'Explore guides on sustainable eating, seasonal nutrition, food waste reduction, and eco-friendly cooking.'
+      },
+      [ViewState.RESOURCE_DETAILS]: {
+        title: selectedResource ? `${selectedResource.title} | eatwell.world` : 'Resource | eatwell.world',
+        description: selectedResource?.description || 'Explore nutrition and sustainability resources on eatwell.world.'
+      },
+      [ViewState.SAVED_RECIPES]: {
+        title: 'Saved Recipes | eatwell.world',
+        description: 'Your saved recipes on eatwell.world. Access your favourite sustainable, healthy meals anytime.'
+      },
+      [ViewState.MANIFESTO]: {
+        title: 'Our Manifesto | eatwell.world',
+        description: 'Our mission: making sustainable, healthy eating accessible for everyone through AI-powered tools and eco-conscious recipes.'
+      },
+      [ViewState.PRIVACY]: {
+        title: 'Privacy Policy | eatwell.world',
+        description: 'Read the eatwell.world privacy policy to understand how we handle your data.'
+      },
+      [ViewState.TERMS]: {
+        title: 'Terms of Service | eatwell.world',
+        description: 'Read the eatwell.world terms of service.'
+      },
+      [ViewState.ABOUT]: {
+        title: 'About | eatwell.world',
+        description: 'Learn more about eatwell.world and our mission to make sustainable, healthy eating easy for everyone.'
+      },
+    };
+
+    const { title, description } = metaMap[view] || metaMap[ViewState.HOME];
+    document.title = title;
+
+    const setMeta = (selector: string, attr: string, value: string) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute(attr, value);
+    };
+
+    setMeta('meta[name="description"]', 'content', description);
+    setMeta('meta[property="og:title"]', 'content', title);
+    setMeta('meta[property="og:description"]', 'content', description);
+    setMeta('meta[name="twitter:title"]', 'content', title);
+    setMeta('meta[name="twitter:description"]', 'content', description);
+  }, [view, selectedRecipe, selectedResource]);
+
   // --- 3. Navigation ---
   const navigateTo = (newView: ViewState) => {
     setView(newView);

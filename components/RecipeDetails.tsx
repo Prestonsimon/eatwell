@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Recipe } from '../types';
 import { 
   Clock, BarChart, Leaf, ArrowLeft, Flame, Copy, 
@@ -36,6 +36,48 @@ export const RecipeDetails: React.FC<RecipeDetailsProps> = ({
   onSave,
   isSaved
 }) => {
+  // Inject Recipe JSON-LD structured data for SEO
+  useEffect(() => {
+    const scriptId = 'recipe-jsonld';
+    const existing = document.getElementById(scriptId);
+    if (existing) existing.remove();
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Recipe',
+      'name': recipe.title,
+      'description': recipe.description,
+      'author': {
+        '@type': 'Organization',
+        'name': 'eatwell.world',
+        'url': 'https://eatwell.world'
+      },
+      'recipeYield': `${recipe.servings} servings`,
+      'recipeIngredient': recipe.ingredients,
+      'recipeInstructions': recipe.instructions.map((step, idx) => ({
+        '@type': 'HowToStep',
+        'position': idx + 1,
+        'text': step
+      })),
+      'nutrition': {
+        '@type': 'NutritionInformation',
+        'calories': `${recipe.calories} calories`
+      },
+      'keywords': (recipe.tags || []).join(', '),
+      'recipeCuisine': 'International',
+      'recipeCategory': recipe.tags?.[0] || 'Main Course'
+    });
+    document.head.appendChild(script);
+
+    return () => {
+      const toRemove = document.getElementById(scriptId);
+      if (toRemove) toRemove.remove();
+    };
+  }, [recipe]);
+
   const [copied, setCopied] = useState(false);
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [currentServings, setCurrentServings] = useState(recipe.servings || 2);
