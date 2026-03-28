@@ -190,6 +190,8 @@ const App: React.FC = () => {
             onGenerate={handleGenerate}
             onGenerateMealPlan={handleGenerateMealPlan}
             onSaveToPlan={handleSaveToPlan}
+            onToggleSave={handleToggleSave}
+            savedRecipes={savedRecipes}
             weeklyPlanner={weeklyPlanner}
             isLoading={loading}
             error={error}
@@ -219,7 +221,7 @@ const App: React.FC = () => {
           <ResourceDetails resource={selectedResource} onBack={() => navigateTo(ViewState.RESOURCES)} />
         )}
         {view === ViewState.SAVED_RECIPES && (
-          <SavedRecipes recipes={savedRecipes} onViewRecipe={handleViewRecipe} onGoToKitchen={() => navigateTo(ViewState.KITCHEN)} />
+          <SavedRecipes recipes={savedRecipes} onViewRecipe={handleViewRecipe} onGoToKitchen={() => navigateTo(ViewState.KITCHEN)} onUnsave={handleToggleSave} />
         )}
         {view === ViewState.MANIFESTO && <Manifesto onBack={() => navigateTo(ViewState.HOME)} />}
         {view === ViewState.PRIVACY && <PrivacyPolicy onBack={() => navigateTo(ViewState.HOME)} />}

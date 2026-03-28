@@ -13,13 +13,15 @@ interface AiKitchenProps {
   onGenerate: (prompt: string, imageBase64?: string) => void;
   onGenerateMealPlan: (type: string) => void;
   onSaveToPlan: (day: string, mealType: string, recipe: Recipe) => void;
+  onToggleSave: (recipe: Recipe) => void;
+  savedRecipes: Recipe[];
   weeklyPlanner: any;
   isLoading: boolean;
   error: string | null;
 }
 
 export const AiKitchen: React.FC<AiKitchenProps> = ({ 
-  recipes, onViewRecipe, onGenerate, onGenerateMealPlan, onSaveToPlan, isLoading, error 
+  recipes, onViewRecipe, onGenerate, onGenerateMealPlan, onSaveToPlan, onToggleSave, savedRecipes, isLoading, error 
 }) => {
   const [inputText, setInputText] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -142,7 +144,8 @@ export const AiKitchen: React.FC<AiKitchenProps> = ({
                   recipe={recipe} 
                   onViewRecipe={onViewRecipe}
                   onSaveToPlan={onSaveToPlan}
-                  onToggleSave={() => {}} // Pass actual function if you have it in App.tsx
+                  onToggleSave={onToggleSave}
+                  isSaved={savedRecipes.some(r => r.title === recipe.title)}
                 />
               ))}
             </div>

@@ -1,14 +1,15 @@
 import React from 'react';
-import { Recipe, ViewState } from '../types';
-import { Bookmark, Utensils, ArrowRight } from 'lucide-react';
+import { Recipe } from '../types';
+import { Bookmark, BookmarkX, Utensils, ArrowRight } from 'lucide-react';
 
 interface SavedRecipesProps {
   recipes: Recipe[];
   onViewRecipe: (recipe: Recipe) => void;
   onGoToKitchen: () => void;
+  onUnsave: (recipe: Recipe) => void;
 }
 
-export const SavedRecipes: React.FC<SavedRecipesProps> = ({ recipes, onViewRecipe, onGoToKitchen }) => {
+export const SavedRecipes: React.FC<SavedRecipesProps> = ({ recipes, onViewRecipe, onGoToKitchen, onUnsave }) => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-12 animate-fadeIn">
       <div className="flex items-center justify-between mb-10">
@@ -46,7 +47,16 @@ export const SavedRecipes: React.FC<SavedRecipesProps> = ({ recipes, onViewRecip
                   <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
                     {recipe.difficulty}
                   </span>
-                  <span className="text-stone-400 text-xs font-medium">{recipe.cookingTime}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-stone-400 text-xs font-medium">{recipe.cookingTime}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onUnsave(recipe); }}
+                      className="p-1.5 rounded-lg text-stone-300 hover:text-red-400 hover:bg-red-50 transition-all"
+                      title="Remove from saved"
+                    >
+                      <BookmarkX size={16} />
+                    </button>
+                  </div>
                 </div>
                 <h3 className="text-xl font-bold text-stone-900 group-hover:text-emerald-600 transition-colors mb-2">
                   {recipe.title}
