@@ -81,6 +81,11 @@ const App: React.FC = () => {
   };
 
   const handleGenerate = async (prompt: string, imageBase64?: string) => {
+    ReactGA.event({
+      category: 'Kitchen',
+      action: 'generate_recipes',
+      label: imageBase64 ? 'with_photo' : 'text_only',
+    });
     setLoading(true);
     setError(null);
     try {
@@ -97,6 +102,13 @@ const App: React.FC = () => {
 
   // DASHBOARD HANDLER: Generates 3 options for a specific meal type
   const handleGenerateMealPlan = async (type?: string) => {
+    if (type && typeof type === 'string') {
+      ReactGA.event({
+        category: 'Kitchen',
+        action: 'generate_meal_type',
+        label: type,
+      });
+    }
     setLoading(true);
     setError(null);
     try {
@@ -131,10 +143,16 @@ const App: React.FC = () => {
   };
 
   const handleToggleSave = (recipe: Recipe) => {
+    const isAlreadySaved = savedRecipes.some((r) => r.title === recipe.title);
+    ReactGA.event({
+      category: 'Recipe',
+      action: isAlreadySaved ? 'unsave_recipe' : 'save_recipe',
+      label: recipe.title,
+    });
     setSavedRecipes((prev) => {
-      const isAlreadySaved = prev.some((r) => r.title === recipe.title);
-      return isAlreadySaved 
-        ? prev.filter((r) => r.title !== recipe.title) 
+      const isSaved = prev.some((r) => r.title === recipe.title);
+      return isSaved
+        ? prev.filter((r) => r.title !== recipe.title)
         : [...prev, recipe];
     });
   };

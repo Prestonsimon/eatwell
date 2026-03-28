@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactGA from 'react-ga4';
 import { Recipe } from '../types';
 import { Clock, BarChart, Leaf, ChevronRight, Flame, Copy, Check, Plus, Bookmark } from 'lucide-react';
 
@@ -24,6 +25,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
     e.stopPropagation();
     const ingredientList = recipe.ingredients.join('\n');
     navigator.clipboard.writeText(ingredientList).then(() => {
+      ReactGA.event({
+        category: 'Recipe',
+        action: 'copy_ingredients',
+        label: recipe.title,
+      });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -34,6 +40,11 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
       alert("Please select a day first!");
       return;
     }
+    ReactGA.event({
+      category: 'Planner',
+      action: 'add_to_plan',
+      label: `${selectedDay} - ${mealType} - ${recipe.title}`,
+    });
     onSaveToPlan(selectedDay, mealType.toLowerCase(), recipe);
     setSelectedDay(''); // Reset after adding
   };
